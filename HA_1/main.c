@@ -55,14 +55,13 @@ void manipulate(bitmap_pixel_rgb_t* pixels, int count, int l, int LoD) //integer
 	}
 }
 
-int main(void)
+int main(int args, char** argsv)
 {
 	// Read the bitmap pixels.
 	bitmap_error_t error;    //int error
 	int width, height;
 	bitmap_pixel_rgb_t* pixels; //pointer auf struct aus 4 integers
-	char* manipbitmap = "sails.bmp";
-	int LoD = 345;  //variable for brightening/darkening -> 0 = brighten | !0 = darken
+	char* manipbitmap = argsv[1];
 	error = bitmapReadPixels(
 		manipbitmap,
 		(bitmap_pixel_t**)&pixels, 
@@ -73,7 +72,20 @@ int main(void)
 
 	assert(error == BITMAP_ERROR_SUCCESS);
 	printf("Bitmap dimensions: %d x %d\n", width, height);
-	int change = 100;  // variable for amount of brightness change
+	int tmp = atoi(argsv[3]);
+	int LoD = 42;  //variable for brightening/darkening -> 0 = brighten | !0 = darke
+	int change = 42;  // variable for amount of brightness change
+	if(tmp > 0)
+	{
+		LoD = 0;
+		change = tmp;
+	}
+	else 
+	{
+		LoD = 1;
+		change = tmp * (-1);
+	}
+	
 	// Manipulate the pixels.
 	manipulate(pixels, width * height, change, LoD);
 
@@ -122,6 +134,5 @@ int main(void)
 
 	// Free the memory that has been allocated by the bitmap library.
 	free(pixels);
-
 	return 0;
 }
