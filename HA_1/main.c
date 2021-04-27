@@ -15,16 +15,17 @@ void manipulate(bitmap_pixel_rgb_t* pixels, int count)
 int main(void)
 {
 	// Read the bitmap pixels.
-	bitmap_error_t error;
+	bitmap_error_t error;    //int error
 	int width, height;
-	bitmap_pixel_rgb_t* pixels;
+	bitmap_pixel_rgb_t* pixels; //pointer auf struct aus 4 integers
+	char* manipbitmap = "sails.bmp";
 
 	error = bitmapReadPixels(
-		"sails.bmp",
-		(bitmap_pixel_t**)&pixels,
-		&width,
+		manipbitmap,
+		(bitmap_pixel_t**)&pixels, 
+		&width,				//referenz auf int
 		&height,
-		BITMAP_COLOR_SPACE_RGB
+		BITMAP_COLOR_SPACE_RGB  //0
 	);
 
 	assert(error == BITMAP_ERROR_SUCCESS);
