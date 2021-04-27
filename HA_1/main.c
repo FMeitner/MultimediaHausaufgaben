@@ -4,11 +4,54 @@
 
 #include "bitmap.h"
 
-void manipulate(bitmap_pixel_rgb_t* pixels, int count)
+void manipulate(bitmap_pixel_rgb_t* pixels, int count, int l, int LoD) //integer l = change specified in main
 {
 	for (int i = 0; i < count; i++)
 	{
-		// TODO
+		bitmap_pixel_rgb_t* pixel = &pixels[i];
+		if(LoD == 0) //check for brightening/darkening
+		{
+		 if((int)(pixel->r)+l > 255 || (int)pixel->b+l > 255 || (int)pixel->g+l > 255) //check for overflow when brightening
+		 {
+			int ll = 42; //value for adjusting brightness to the maximum amount without overflowing
+			if(pixel->r >= pixel->b && pixel->r >= pixel->g)
+			{
+				ll = 255 - pixel->r;
+			} else if(pixel->b >= pixel->r && pixel->b >= pixel->g) {
+				ll = 255 - pixel->b;
+			} else {
+				ll = 255 - pixel->g;
+			}
+			pixel->r += ll;
+			pixel->b += ll;
+			pixel->g += ll;
+		 } else {
+			 pixel->r += l;
+			 pixel->g += l;
+			 pixel->b += l;
+		 }
+		} else {
+			
+		 if((int)(pixel->r)-l < 0 || (int)pixel->b-l < 0 || (int)pixel->g-l < 0) //check for underflow when darkening
+		 {
+			int ll = 42; //value for adjusting brightness to the maximum amount without underflowing
+			if(pixel->r <= pixel->b && pixel->r <= pixel->g)
+			{
+				ll = pixel->r;
+			} else if(pixel->b <= pixel->r && pixel->b <= pixel->g) {
+				ll = pixel->b;;
+			} else {
+				ll = pixel->g;
+			}
+			pixel->r -= ll;
+			pixel->b -= ll;
+			pixel->g -= ll;
+		 } else {
+			 pixel->r -= l;
+			 pixel->g -= l;
+			 pixel->b -= l;
+		 }
+		}
 	}
 }
 
@@ -19,7 +62,7 @@ int main(void)
 	int width, height;
 	bitmap_pixel_rgb_t* pixels; //pointer auf struct aus 4 integers
 	char* manipbitmap = "sails.bmp";
-
+	int LoD = 345;  //variable for brightening/darkening -> 0 = brighten | !0 = darken
 	error = bitmapReadPixels(
 		manipbitmap,
 		(bitmap_pixel_t**)&pixels, 
@@ -30,9 +73,9 @@ int main(void)
 
 	assert(error == BITMAP_ERROR_SUCCESS);
 	printf("Bitmap dimensions: %d x %d\n", width, height);
-
+	int change = 100;  // variable for amount of brightness change
 	// Manipulate the pixels.
-	manipulate(pixels, width * height);
+	manipulate(pixels, width * height, change, LoD);
 
 	// Write the pixels back.
 	bitmap_parameters_t params =
@@ -58,13 +101,22 @@ int main(void)
 		// The color space the user provides:
 		.colorSpace = BITMAP_COLOR_SPACE_RGB
 	};
-
+	if(LoD == 0) //Check for brightening/darkening -> creating file with according name
+	{
 	error = bitmapWritePixels(
-		"sails_mod.bmp",
+		"sails_lighter.bmp",
 		BITMAP_BOOL_TRUE,
 		&params,
 		(bitmap_pixel_t*)pixels
 	);
+	} else {
+		error = bitmapWritePixels(
+		"sails_darker.bmp",
+		BITMAP_BOOL_TRUE,
+		&params,
+		(bitmap_pixel_t*)pixels
+	);
+	}
 
 	assert(error == BITMAP_ERROR_SUCCESS);
 
